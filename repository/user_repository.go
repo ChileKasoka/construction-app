@@ -92,6 +92,32 @@ func (r *UserRepository) GetByID(id int) (*model.User, error) {
 	return &user, nil
 }
 
+func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
+	query := `
+	SELECT u.id, u.name, u.email, u.password, u.role_id, r.name, r.description, u.created_at
+	FROM users u
+	LEFT JOIN roles r ON u.role_id = r.id
+	WHERE u.email = $1
+	`
+	row := r.DB.QueryRow(query, email)
+
+	var user model.User
+	var role model.Role
+
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.RoleID, &role.Name, &role.Description, &user.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+
+	role.ID = user.RoleID
+	user.Role = &role
+
+	return &user, nil
+}
+
 func (r *UserRepository) Update(user model.User) error {
 	query := `
 	UPDATE users SET name=$1, email=$2, password=$3, role_id=$4 WHERE id=$5

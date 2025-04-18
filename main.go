@@ -6,6 +6,7 @@ import (
 
 	"github.com/ChileKasoka/construction-app/controller"
 	"github.com/ChileKasoka/construction-app/db"
+	mw "github.com/ChileKasoka/construction-app/middleware"
 	"github.com/ChileKasoka/construction-app/repository"
 	"github.com/ChileKasoka/construction-app/service"
 
@@ -37,7 +38,7 @@ func main() {
 	r.Use(middleware.Logger)
 
 	r.Route("/projects", func(r chi.Router) {
-		r.Get("/", projectController.GetAll)
+		r.With(mw.RoleMiddleware("admin")).Get("/", projectController.GetAll)
 		r.Post("/", projectController.Create)
 		r.Get("/{id}", projectController.GetByID)
 		r.Put("/{id}", projectController.Update)
@@ -49,6 +50,7 @@ func main() {
 		r.Put("/{id}", userController.Update)
 		r.Delete("/{id}", userController.Delete)
 	})
+	r.Post("/login", userController.Login)
 
 	log.Println("Server started on :8080")
 	http.ListenAndServe(":8080", r)

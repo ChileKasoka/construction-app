@@ -1,8 +1,12 @@
 package service
 
 import (
+	"errors"
+
+	"github.com/ChileKasoka/construction-app/middleware/auth"
 	"github.com/ChileKasoka/construction-app/model"
 	"github.com/ChileKasoka/construction-app/repository"
+	// "golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -24,6 +28,28 @@ func (s *UserService) GetAll() ([]model.User, error) {
 
 func (s *UserService) GetByID(id int) (*model.User, error) {
 	return s.Repo.GetByID(id)
+}
+
+func (s *UserService) Authenticate(email, password string) (string, string, error) {
+	// Fetch user by email
+	user, err := s.Repo.FindByEmail(email)
+	if err != nil {
+		return "", "", errors.New("invalid email or password")
+	}
+
+	// Compare hashed password
+	// err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	// if err != nil {
+	// 	return "", "", errors.New("invalid email or password")
+	// }
+
+	// Generate JWT token
+	token, err := auth.CreateJWT(user.ID, user.Role.Name)
+	if err != nil {
+		return "", "", errors.New("failed to generate token")
+	}
+
+	return token, user.Role.Name, nil
 }
 
 func (s *UserService) Update(user model.User) error {
