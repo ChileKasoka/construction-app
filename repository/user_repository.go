@@ -1,51 +1,107 @@
 package repository
 
 import (
+	"database/sql"
 	"errors"
 
 	"github.com/ChileKasoka/construction-app/model"
 )
 
-type UserRepository struct{}
+type UserRepository struct {
+	DB *sql.DB
+}
 
-var users = []model.User{
-	{ID: 1, Name: "Admin", Email: "admin@site.com", Role: "admin"},
+func NewUserRepository(db *sql.DB) *UserRepository {
+	return &UserRepository{DB: db}
+}
+
+func (r *UserRepository) Create(user *model.User) error {
+	query := `
+	INSERT INTO users (name, email, password, role_id)
+	VALUES ($1, $2, $3, $4)
+	RETURNING id, created_at
+	`
+
+	err := r.DB.QueryRow(query, user.Name, user.Email, user.Password, user.RoleID).
+		Scan(&user.ID, &user.CreatedAt)
+
+	return err
 }
 
 func (r *UserRepository) GetAll() ([]model.User, error) {
+	query := `
+	SELECT u.id, u.name, u.email, u.password, u.role_id, r.name, r.description, u.created_at
+	FROM users u
+	LEFT JOIN roles r ON u.role_id = r.id
+	ORDER BY u.id
+	`
+
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+
+	for rows.Next() {
+		var user model.User
+		var role model.Role
+
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.RoleID, &role.Name, &role.Description, &user.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		role.ID = user.RoleID
+		user.Role = &role
+
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return users, nil
 }
 
 func (r *UserRepository) GetByID(id int) (*model.User, error) {
-	for _, u := range users {
-		if u.ID == id {
-			return &u, nil
+	query := `
+	SELECT u.id, u.name, u.email, u.password, u.role_id, r.name, r.description, u.created_at
+	FROM users u
+	LEFT JOIN roles r ON u.role_id = r.id
+	WHERE u.id = $1
+	`
+	row := r.DB.QueryRow(query, id)
+
+	var user model.User
+	var role model.Role
+
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.RoleID, &role.Name, &role.Description, &user.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("user not found")
 		}
+		return nil, err
 	}
-	return nil, errors.New("user not found")
+
+	role.ID = user.RoleID
+	user.Role = &role
+
+	return &user, nil
 }
 
-func (r *UserRepository) Update(id int, data map[string]interface{}) (*model.User, error) {
-	for i, u := range users {
-		if u.ID == id {
-			if name, ok := data["name"].(string); ok {
-				users[i].Name = name
-			}
-			if email, ok := data["email"].(string); ok {
-				users[i].Email = email
-			}
-			return &users[i], nil
-		}
-	}
-	return nil, errors.New("user not found")
+func (r *UserRepository) Update(user model.User) error {
+	query := `
+	UPDATE users SET name=$1, email=$2, password=$3, role_id=$4 WHERE id=$5
+	`
+	_, err := r.DB.Exec(query, user.Name, user.Email, user.Password, user.RoleID, user.ID)
+	return err
 }
 
 func (r *UserRepository) Delete(id int) error {
-	for i, u := range users {
-		if u.ID == id {
-			users = append(users[:i], users[i+1:]...)
-			return nil
-		}
-	}
-	return errors.New("user not found")
+	query := `DELETE FROM users WHERE id=$1`
+	_, err := r.DB.Exec(query, id)
+	return err
 }

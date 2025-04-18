@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/ChileKasoka/construction-app/model"
 	"github.com/ChileKasoka/construction-app/service"
 	"github.com/go-chi/chi/v5"
 )
@@ -29,17 +30,28 @@ func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	var user map[string]interface{}
-	json.NewDecoder(r.Body).Decode(&user)
-	updated, err := c.Service.Update(id, user)
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	var user model.User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	user.ID = id // Ensure path param is used
+	err = c.Service.Update(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(updated)
-}
 
+	json.NewEncoder(w).Encode(map[string]string{"message": "User updated successfully"})
+}
 func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	err := c.Service.Delete(id)

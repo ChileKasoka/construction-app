@@ -1,8 +1,13 @@
 package model
 
+import "time"
+
 type User struct {
-    ID    int    `json:"id"`
-    Name  string `json:"name"`
-    Email string `json:"email"`
-    Role  string `json:"role"`
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"-"` // omit from JSON responses
+	RoleID    int       `json:"role_id"`
+	Role      *Role     `json:"role,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 }
