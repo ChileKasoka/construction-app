@@ -8,7 +8,7 @@ import (
 
 	"github.com/ChileKasoka/construction-app/config"
 	"github.com/ChileKasoka/construction-app/controller"
-	"github.com/ChileKasoka/construction-app/middleware"
+	mw "github.com/ChileKasoka/construction-app/middleware"
 	"github.com/ChileKasoka/construction-app/repository"
 	"github.com/ChileKasoka/construction-app/service"
 )
@@ -28,7 +28,7 @@ func main() {
 	r.Get("/projects/{id}", projectController.GetByID)
 
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.RoleMiddleware("admin"))
+		r.Use(mw.RoleMiddleware("admin"))
 		r.Post("/projects", projectController.Create)
 		r.Put("/projects/{id}", projectController.Update)
 		r.Delete("/projects/{id}", projectController.Delete)
@@ -40,7 +40,7 @@ func main() {
 	userController := &controller.UserController{Service: userService}
 
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.RoleMiddleware("admin"))
+		r.Use(mw.RoleMiddleware("admin"))
 		r.Get("/users", userController.GetAll)
 		r.Get("/users/{id}", userController.GetByID)
 		r.Put("/users/{id}", userController.Update)

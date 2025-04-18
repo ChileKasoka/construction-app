@@ -1,4 +1,4 @@
-module github.com/ChileKasoka/construction-app-rbac
+module github.com/ChileKasoka/construction-app
 
 go 1.24.1
 
