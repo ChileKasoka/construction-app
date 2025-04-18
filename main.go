@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/ChileKasoka/construction-app/config"
 	"github.com/ChileKasoka/construction-app/controller"
 	mw "github.com/ChileKasoka/construction-app/middleware"
 	"github.com/ChileKasoka/construction-app/repository"
@@ -14,7 +13,6 @@ import (
 )
 
 func main() {
-	config.ConnectDB()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

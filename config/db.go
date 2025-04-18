@@ -1,24 +1,31 @@
-package config
+package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
+func ConnectDb() (*sql.DB, error) {
+	dbUrl := os.Getenv("DATABASE_URL")
 
-func ConnectDB() {
-	var err error
-	DB, err = sql.Open("postgres", "host=localhost port=5432 user=postgres password=p@ssw0rd dbname=cmis sslmode=disable")
+	if dbUrl == "" {
+		log.Fatal("db url not set")
+	}
+
+	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
-		log.Fatal("Database connection failed:", err)
+		panic(err)
 	}
+	//defer db.Close()
+	err = db.Ping()
 
-	if err = DB.Ping(); err != nil {
-		log.Fatal("Database not responding:", err)
+	if err != nil {
+		panic(err)
 	}
-
-	log.Println("Connected to DB")
+	fmt.Println("Established a successful DB connection!")
+	return db, nil
 }

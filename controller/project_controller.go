@@ -19,6 +19,16 @@ func (c *ProjectController) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(projects)
 }
 
+func (c *ProjectController) GetByID(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	project, err := c.Service.GetByID(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(project)
+}
+
 func (c *ProjectController) Create(w http.ResponseWriter, r *http.Request) {
 	var p model.Project
 	json.NewDecoder(r.Body).Decode(&p)
