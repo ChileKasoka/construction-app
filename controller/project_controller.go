@@ -14,6 +14,10 @@ type ProjectController struct {
 	Service *service.ProjectService
 }
 
+func NewProjectController(service *service.ProjectService) *ProjectController {
+	return &ProjectController{Service: service}
+}
+
 func (c *ProjectController) GetAll(w http.ResponseWriter, r *http.Request) {
 	projects, _ := c.Service.GetAll()
 	json.NewEncoder(w).Encode(projects)

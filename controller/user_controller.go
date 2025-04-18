@@ -14,6 +14,10 @@ type UserController struct {
 	Service *service.UserService
 }
 
+func NewUserController(service *service.UserService) *UserController {
+	return &UserController{Service: service}
+}
+
 func (c *UserController) GetAll(w http.ResponseWriter, r *http.Request) {
 	users, _ := c.Service.GetAll()
 	json.NewEncoder(w).Encode(users)

@@ -9,6 +9,10 @@ type ProjectService struct {
 	Repo *repository.ProjectRepository
 }
 
+func NewProjectService(repo *repository.ProjectRepository) *ProjectService {
+	return &ProjectService{Repo: repo}
+}
+
 func (s *ProjectService) GetAll() ([]model.Project, error) {
 	return s.Repo.GetAll()
 }

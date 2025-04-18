@@ -9,6 +9,10 @@ type UserService struct {
 	Repo *repository.UserRepository
 }
 
+func NewUserService(repo *repository.UserRepository) *UserService {
+	return &UserService{Repo: repo}
+}
+
 func (s *UserService) Create(user *model.User) error {
 	// TODO: add validation or email uniqueness check if needed
 	return s.Repo.Create(user)

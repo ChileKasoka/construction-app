@@ -1,49 +1,55 @@
 package main
 
 import (
+	"log"
 	"net/http"
+
+	"github.com/ChileKasoka/construction-app/controller"
+	"github.com/ChileKasoka/construction-app/db"
+	"github.com/ChileKasoka/construction-app/repository"
+	"github.com/ChileKasoka/construction-app/service"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-
-	"github.com/ChileKasoka/construction-app/controller"
-	mw "github.com/ChileKasoka/construction-app/middleware"
-	"github.com/ChileKasoka/construction-app/repository"
-	"github.com/ChileKasoka/construction-app/service"
 )
 
 func main() {
+	db, err := db.ConnectDb()
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer db.Close()
 
+	// Set up repositories
+	userRepo := repository.NewUserRepository(db)
+	projectRepo := repository.NewProjectRepository(db)
+
+	// Set up services
+	userService := service.NewUserService(userRepo)
+	projectService := service.NewProjectService(projectRepo)
+
+	// Set up controllers
+	userController := controller.NewUserController(userService)
+	projectController := controller.NewProjectController(projectService)
+
+	// Set up router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	// Project setup
-	projectRepo := &repository.ProjectRepository{}
-	projectService := &service.ProjectService{Repo: projectRepo}
-	projectController := &controller.ProjectController{Service: projectService}
-
-	r.Get("/projects", projectController.GetAll)
-	r.Get("/projects/{id}", projectController.GetByID)
-
-	r.Group(func(r chi.Router) {
-		r.Use(mw.RoleMiddleware("admin"))
-		r.Post("/projects", projectController.Create)
-		r.Put("/projects/{id}", projectController.Update)
-		r.Delete("/projects/{id}", projectController.Delete)
+	r.Route("/projects", func(r chi.Router) {
+		r.Get("/", projectController.GetAll)
+		r.Post("/", projectController.Create)
+		r.Get("/{id}", projectController.GetByID)
+		r.Put("/{id}", projectController.Update)
+		r.Delete("/{id}", projectController.Delete)
 	})
 
-	// User setup
-	userRepo := &repository.UserRepository{}
-	userService := &service.UserService{Repo: userRepo}
-	userController := &controller.UserController{Service: userService}
-
-	r.Group(func(r chi.Router) {
-		r.Use(mw.RoleMiddleware("admin"))
-		r.Get("/users", userController.GetAll)
-		r.Get("/users/{id}", userController.GetByID)
-		r.Put("/users/{id}", userController.Update)
-		r.Delete("/users/{id}", userController.Delete)
+	r.Route("/users", func(r chi.Router) {
+		r.Get("/{id}", userController.GetByID)
+		r.Put("/{id}", userController.Update)
+		r.Delete("/{id}", userController.Delete)
 	})
 
+	log.Println("Server started on :8080")
 	http.ListenAndServe(":8080", r)
 }
