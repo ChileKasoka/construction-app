@@ -24,14 +24,17 @@ func main() {
 	// Set up repositories
 	userRepo := repository.NewUserRepository(db)
 	projectRepo := repository.NewProjectRepository(db)
+	roleRepo := repository.NewRoleRepository(db)
 
 	// Set up services
 	userService := service.NewUserService(userRepo)
 	projectService := service.NewProjectService(projectRepo)
+	roleService := service.NewRoleService(roleRepo)
 
 	// Set up controllers
 	userController := controller.NewUserController(userService)
 	projectController := controller.NewProjectController(projectService)
+	roleController := controller.NewRoleController(roleService)
 
 	// Set up router
 	r := chi.NewRouter()
@@ -43,6 +46,15 @@ func main() {
 		r.Get("/{id}", projectController.GetByID)
 		r.Put("/{id}", projectController.Update)
 		r.Delete("/{id}", projectController.Delete)
+	})
+
+	r.Route("/roles", func(r chi.Router) {
+		r.Get("/", roleController.GetAll)
+		r.Post("/", roleController.Create)
+		r.Get("/{id}", roleController.GetByID)
+		r.Put("/{id}", roleController.Update)
+		r.Delete("/{id}", roleController.Delete)
+		r.Get("/name/{name}", roleController.FindByName)
 	})
 
 	r.Route("/users", func(r chi.Router) {
