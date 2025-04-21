@@ -24,7 +24,6 @@ func (c *RoleController) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
-
 }
 
 func (c *RoleController) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -49,6 +48,11 @@ func (c *RoleController) GetByID(w http.ResponseWriter, r *http.Request) {
 func (c *RoleController) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "invalid role ID", http.StatusBadRequest)
+		return
+	}
+
 	var role model.Role
 	if err := json.NewDecoder(r.Body).Decode(&role); err != nil {
 		http.Error(w, "invalid request", http.StatusBadRequest)
@@ -56,11 +60,11 @@ func (c *RoleController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	role.ID = id
-	err = c.Service.Update(&role)
-	if err != nil {
+	if err := c.Service.Update(&role); err != nil {
 		http.Error(w, "failed to update role", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
