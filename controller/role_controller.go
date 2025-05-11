@@ -24,6 +24,11 @@ func (c *RoleController) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
+
+	err := c.Service.Create(&req)
+	if err != nil {
+		http.Error(w, "failed to create new role", http.StatusInternalServerError)
+	}
 }
 
 func (c *RoleController) GetAll(w http.ResponseWriter, r *http.Request) {

@@ -49,9 +49,9 @@ func main() {
 	})
 
 	r.Route("/roles", func(r chi.Router) {
-		r.Get("/", roleController.GetAll)
+		r.With(mw.RoleMiddleware("admin")).Get("/", roleController.GetAll)
 		r.Post("/", roleController.Create)
-		r.Get("/{id}", roleController.GetByID)
+		r.With(mw.RoleMiddleware("admin")).Get("/{id}", roleController.GetByID)
 		r.Put("/{id}", roleController.Update)
 		r.Delete("/{id}", roleController.Delete)
 		r.Get("/name/{name}", roleController.FindByName)
