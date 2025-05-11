@@ -22,13 +22,13 @@ func (c *RolePermissionController) AssignPermission(w http.ResponseWriter, r *ht
 
 	var payload AssignPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
 
 	err := c.Service.AssignPermission(roleID, payload.PermissionID)
 	if err != nil {
-		http.Error(w, "Could not assign permission", http.StatusInternalServerError)
+		http.Error(w, "could not assign permission", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
