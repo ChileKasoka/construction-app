@@ -27,7 +27,7 @@ func main() {
 	roleRepo := repository.NewRoleRepository(db)
 
 	// Set up services
-	userService := service.NewUserService(userRepo)
+	userService := service.NewUserService(userRepo, roleRepo)
 	projectService := service.NewProjectService(projectRepo)
 	roleService := service.NewRoleService(roleRepo)
 
@@ -58,7 +58,8 @@ func main() {
 	})
 
 	r.Route("/users", func(r chi.Router) {
-		r.Get("/{id}", userController.GetByID)
+		r.With(mw.RoleMiddleware("admin")).Post("/", userController.Create)
+		r.With(mw.RoleMiddleware("admin")).Get("/{id}", userController.GetByID)
 		r.Put("/{id}", userController.Update)
 		r.Delete("/{id}", userController.Delete)
 	})

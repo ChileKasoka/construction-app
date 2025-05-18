@@ -10,15 +10,30 @@ import (
 )
 
 type UserService struct {
-	Repo *repository.UserRepository
+	Repo     *repository.UserRepository
+	RoleRepo *repository.RoleRepository
 }
 
-func NewUserService(repo *repository.UserRepository) *UserService {
-	return &UserService{Repo: repo}
+func NewUserService(uRepo *repository.UserRepository, rRepo *repository.RoleRepository) *UserService {
+	return &UserService{
+		Repo:     uRepo,
+		RoleRepo: rRepo,
+	}
 }
 
-func (s *UserService) Create(user *model.User) error {
+func (s *UserService) Create(req model.RegisterRequest) error {
 	// TODO: add validation or email uniqueness check if needed
+
+	role, err := s.RoleRepo.GetByID(req.RoleID)
+	if err != nil {
+		return errors.New("role not found")
+	}
+	user := &model.RegisterRequest{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: req.Password,
+		RoleID:   role.ID,
+	}
 	return s.Repo.Create(user)
 }
 

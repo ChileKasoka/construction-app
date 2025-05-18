@@ -15,7 +15,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{DB: db}
 }
 
-func (r *UserRepository) Create(user *model.User) error {
+func (r *UserRepository) Create(user *model.RegisterRequest) error {
 	query := `
 	INSERT INTO users (name, email, password, role_id)
 	VALUES ($1, $2, $3, $4)

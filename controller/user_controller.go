@@ -18,12 +18,7 @@ type LoginResponse struct {
 	AccessToken string `json:"access_token"`
 	Role        string `json:"role"`
 }
-type RegisterRequest struct {
-	Email    string     `json:"email"`
-	Password string     `json:"password"`
-	Name     string     `json:"name"`
-	Role     model.Role `json:"role_id"`
-}
+
 type RegisterResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -48,7 +43,7 @@ func NewUserController(service *service.UserService) *UserController {
 }
 
 func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
-	var user model.User
+	var user model.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -56,7 +51,7 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 
 	// role, err :=
 
-	err := c.Service.Create(&user)
+	err := c.Service.Create(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
