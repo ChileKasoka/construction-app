@@ -25,20 +25,27 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	projectRepo := repository.NewProjectRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
+	permissionRepo := repository.NewPermissionRepository(db)
+	rolePermissionRepo := repository.NewRolePerissionRepo(db)
 
 	// Set up services
 	userService := service.NewUserService(userRepo, roleRepo)
 	projectService := service.NewProjectService(projectRepo)
 	roleService := service.NewRoleService(roleRepo)
+	permissionService := service.NewPermissionService(permissionRepo)
+	rolePermissionService := service.NewRolePermissionService(rolePermissionRepo)
 
 	// Set up controllers
 	userController := controller.NewUserController(userService)
 	projectController := controller.NewProjectController(projectService)
 	roleController := controller.NewRoleController(roleService)
+	permissionController := controller.NewPermissionController(permissionService)
+	rolePermissionController := controller.NewRolePermissionController(rolePermissionService)
 
 	// Set up router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(mw.CorsMiddleware)
 
 	r.Route("/projects", func(r chi.Router) {
 		r.With(mw.RoleMiddleware("admin")).Get("/", projectController.GetAll)
@@ -49,7 +56,7 @@ func main() {
 	})
 
 	r.Route("/roles", func(r chi.Router) {
-		r.With(mw.RoleMiddleware("admin")).Get("/", roleController.GetAll)
+		r.Get("/", roleController.GetAll)
 		r.Post("/", roleController.Create)
 		r.With(mw.RoleMiddleware("admin")).Get("/{id}", roleController.GetByID)
 		r.Put("/{id}", roleController.Update)
@@ -57,8 +64,18 @@ func main() {
 		r.Get("/name/{name}", roleController.FindByName)
 	})
 
+	r.Route("/permissions", func(r chi.Router) {
+		r.Post("/", permissionController.Create)
+		r.Get("/", permissionController.GetAll)
+	})
+
+	r.Route("/role-permissions", func(r chi.Router) {
+		r.Post("/{roleID}", rolePermissionController.AssignPermission)
+		r.Get("/", rolePermissionController.ListAllRolePermissions)
+	})
+
 	r.Route("/users", func(r chi.Router) {
-		r.With(mw.RoleMiddleware("admin")).Post("/", userController.Create)
+		r.Post("/", userController.Create)
 		r.With(mw.RoleMiddleware("admin")).Get("/{id}", userController.GetByID)
 		r.Put("/{id}", userController.Update)
 		r.Delete("/{id}", userController.Delete)

@@ -10,6 +10,10 @@ type PermissionRepository struct {
 	DB *sql.DB
 }
 
+func NewPermissionRepository(db *sql.DB) *PermissionRepository {
+	return &PermissionRepository{DB: db}
+}
+
 func (r *PermissionRepository) Create(permission *model.Permission) error {
 	query := `INSERT INTO permissions (name, path, method) VALUES ($1, $2, $3) RETURNING id`
 	return r.DB.QueryRow(query, permission.Name, permission.Path, permission.Method).Scan(&permission.ID)

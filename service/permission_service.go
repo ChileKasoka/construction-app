@@ -9,6 +9,10 @@ type PermissionService struct {
 	Repo *repository.PermissionRepository
 }
 
+func NewPermissionService(repo *repository.PermissionRepository) *PermissionService {
+	return &PermissionService{Repo: repo}
+}
+
 func (s *PermissionService) Create(permission *model.Permission) error {
 	return s.Repo.Create(permission)
 }

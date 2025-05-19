@@ -14,6 +14,10 @@ type PermissionController struct {
 	Service *service.PermissionService
 }
 
+func NewPermissionController(service *service.PermissionService) *PermissionController {
+	return &PermissionController{Service: service}
+}
+
 func (c *PermissionController) Create(w http.ResponseWriter, r *http.Request) {
 	var p model.Permission
 	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
