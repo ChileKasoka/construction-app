@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"math/rand"
 
 	"github.com/ChileKasoka/construction-app/middleware/auth"
 	"github.com/ChileKasoka/construction-app/model"
@@ -21,6 +22,15 @@ func NewUserService(uRepo *repository.UserRepository, rRepo *repository.RoleRepo
 	}
 }
 
+func generateRandomPassword(n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	password := make([]byte, n)
+	for i := range password {
+		password[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(password)
+}
+
 func (s *UserService) Create(req model.RegisterRequest) error {
 	// TODO: add validation or email uniqueness check if needed
 
@@ -28,10 +38,15 @@ func (s *UserService) Create(req model.RegisterRequest) error {
 	if err != nil {
 		return errors.New("role not found")
 	}
+
+	password := req.Password
+	if req.Password == "" {
+		password = generateRandomPassword(10)
+	}
 	user := &model.RegisterRequest{
 		Name:     req.Name,
 		Email:    req.Email,
-		Password: req.Password,
+		Password: password,
 		RoleID:   role.ID,
 	}
 	return s.Repo.Create(user)
@@ -45,11 +60,11 @@ func (s *UserService) GetByID(id int) (*model.User, error) {
 	return s.Repo.GetByID(id)
 }
 
-func (s *UserService) Authenticate(email, password string) (string, string, error) {
+func (s *UserService) Authenticate(email, password string) (string, string, string, error) {
 	// Fetch user by email
 	user, err := s.Repo.FindByEmail(email)
 	if err != nil {
-		return "", "", errors.New("invalid email or password")
+		return "", "", "", errors.New("invalid email or password")
 	}
 
 	// Compare hashed password
@@ -61,10 +76,10 @@ func (s *UserService) Authenticate(email, password string) (string, string, erro
 	// Generate JWT token
 	token, err := auth.CreateJWT(user.ID, user.Role.Name)
 	if err != nil {
-		return "", "", errors.New("failed to generate token")
+		return "", "", "", errors.New("failed to generate token")
 	}
 
-	return token, user.Role.Name, nil
+	return token, user.Role.Name, user.Name, nil
 }
 
 func (s *UserService) Update(user model.User) error {

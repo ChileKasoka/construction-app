@@ -76,6 +76,7 @@ func main() {
 
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/", userController.Create)
+		r.Get("/", userController.GetAll)
 		r.With(mw.RoleMiddleware("admin")).Get("/{id}", userController.GetByID)
 		r.Put("/{id}", userController.Update)
 		r.Delete("/{id}", userController.Delete)
