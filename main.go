@@ -22,6 +22,8 @@ func main() {
 	defer db.Close()
 
 	// Set up repositories
+	rolePermRepo := repository.NewRolePerissionRepo(db)
+
 	userRepo := repository.NewUserRepository(db)
 	projectRepo := repository.NewProjectRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
@@ -48,7 +50,7 @@ func main() {
 	r.Use(mw.CorsMiddleware)
 
 	r.Route("/projects", func(r chi.Router) {
-		r.With(mw.RoleMiddleware("admin")).Get("/", projectController.GetAll)
+		r.Get("/", projectController.GetAll)
 		r.Post("/", projectController.Create)
 		r.Get("/{id}", projectController.GetByID)
 		r.Put("/{id}", projectController.Update)
@@ -56,28 +58,32 @@ func main() {
 	})
 
 	r.Route("/roles", func(r chi.Router) {
+		r.Use(mw.RoleMiddleware(rolePermRepo))
 		r.Get("/", roleController.GetAll)
 		r.Post("/", roleController.Create)
-		r.With(mw.RoleMiddleware("admin")).Get("/{id}", roleController.GetByID)
+		r.Get("/{id}", roleController.GetByID)
 		r.Put("/{id}", roleController.Update)
 		r.Delete("/{id}", roleController.Delete)
 		r.Get("/name/{name}", roleController.FindByName)
 	})
 
 	r.Route("/permissions", func(r chi.Router) {
+		r.Use(mw.RoleMiddleware(rolePermRepo))
 		r.Post("/", permissionController.Create)
 		r.Get("/", permissionController.GetAll)
 	})
 
 	r.Route("/role-permissions", func(r chi.Router) {
+		r.Use(mw.RoleMiddleware(rolePermRepo))
 		r.Post("/{roleID}", rolePermissionController.AssignPermission)
 		r.Get("/", rolePermissionController.ListAllRolePermissions)
 	})
 
 	r.Route("/users", func(r chi.Router) {
+		r.Use(mw.RoleMiddleware(rolePermRepo))
 		r.Post("/", userController.Create)
 		r.Get("/", userController.GetAll)
-		r.With(mw.RoleMiddleware("admin")).Get("/{id}", userController.GetByID)
+		r.Get("/{id}", userController.GetByID)
 		r.Put("/{id}", userController.Update)
 		r.Delete("/{id}", userController.Delete)
 	})

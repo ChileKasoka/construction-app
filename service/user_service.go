@@ -60,11 +60,16 @@ func (s *UserService) GetByID(id int) (*model.User, error) {
 	return s.Repo.GetByID(id)
 }
 
-func (s *UserService) Authenticate(email, password string) (string, string, string, error) {
+func (s *UserService) Authenticate(email, password string) (string, string, string, int, error) {
 	// Fetch user by email
 	user, err := s.Repo.FindByEmail(email)
 	if err != nil {
-		return "", "", "", errors.New("invalid email or password")
+		return "", "", "", 0, errors.New("invalid email or password")
+	}
+
+	role, err := s.RoleRepo.GetByID(user.RoleID)
+	if err != nil {
+		return "", "", "", 0, errors.New("role not found")
 	}
 
 	// Compare hashed password
@@ -74,12 +79,12 @@ func (s *UserService) Authenticate(email, password string) (string, string, stri
 	// }
 
 	// Generate JWT token
-	token, err := auth.CreateJWT(user.ID, user.Role.Name)
+	token, err := auth.CreateJWT(user.ID, user.Role.Name, role.ID)
 	if err != nil {
-		return "", "", "", errors.New("failed to generate token")
+		return "", "", "", 0, errors.New("failed to generate token")
 	}
 
-	return token, user.Role.Name, user.Name, nil
+	return token, user.Role.Name, user.Name, role.ID, nil
 }
 
 func (s *UserService) Update(user model.User) error {

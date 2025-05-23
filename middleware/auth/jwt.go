@@ -29,10 +29,11 @@ func init() {
 }
 
 // CreateJWT creates a JWT token with custom claims
-func CreateJWT(userID int, role string) (string, error) {
+func CreateJWT(userID int, role string, roleID int) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
 		"role":    role,
+		"role_id": roleID,
 		"exp":     time.Now().Add(time.Hour * 72).Unix(),
 	}
 

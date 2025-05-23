@@ -18,6 +18,7 @@ type LoginResponse struct {
 	AccessToken string `json:"access_token"`
 	Role        string `json:"role"`
 	User        string `json:"user"`
+	RoleID      int    `json:"role_id"`
 }
 
 type RegisterResponse struct {
@@ -68,7 +69,7 @@ func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, role, user, err := c.Service.Authenticate(req.Email, req.Password)
+	accessToken, role, user, roleID, err := c.Service.Authenticate(req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -78,6 +79,7 @@ func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {
 		AccessToken: accessToken,
 		Role:        role,
 		User:        user,
+		RoleID:      roleID,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

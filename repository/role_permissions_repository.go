@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/ChileKasoka/construction-app/model"
 )
@@ -13,6 +14,39 @@ type RolePermissionRepo struct {
 
 func NewRolePerissionRepo(db *sql.DB) *RolePermissionRepo {
 	return &RolePermissionRepo{DB: db}
+}
+
+func (r *RolePermissionRepo) HasPermission(roleID int, path string) (bool, error) {
+	permissions, err := r.GetByRoleID(roleID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, p := range permissions {
+		if p.Path == path {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func matchPath(pattern, path string) bool {
+	patternParts := strings.Split(pattern, "/")
+	pathParts := strings.Split(path, "/")
+
+	if len(patternParts) != len(pathParts) {
+		return false
+	}
+
+	for i := 0; i < len(patternParts); i++ {
+		if strings.HasPrefix(patternParts[i], ":") {
+			continue // parameter placeholder matches anything
+		}
+		if patternParts[i] != pathParts[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func (r *RolePermissionRepo) Create(roleID int, permissionIDs []int) error {
