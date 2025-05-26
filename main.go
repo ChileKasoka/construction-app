@@ -29,6 +29,8 @@ func main() {
 	roleRepo := repository.NewRoleRepository(db)
 	permissionRepo := repository.NewPermissionRepository(db)
 	rolePermissionRepo := repository.NewRolePerissionRepo(db)
+	taskRepo := repository.NewTaskRepository(db)
+	userTaskRepo := repository.NewUserTaskRepository(db)
 
 	// Set up services
 	userService := service.NewUserService(userRepo, roleRepo)
@@ -36,6 +38,8 @@ func main() {
 	roleService := service.NewRoleService(roleRepo)
 	permissionService := service.NewPermissionService(permissionRepo)
 	rolePermissionService := service.NewRolePermissionService(rolePermissionRepo)
+	taskService := service.NewTaskService(taskRepo)
+	userTaskService := service.NewUserTaskService(userTaskRepo, taskRepo)
 
 	// Set up controllers
 	userController := controller.NewUserController(userService)
@@ -43,6 +47,8 @@ func main() {
 	roleController := controller.NewRoleController(roleService)
 	permissionController := controller.NewPermissionController(permissionService)
 	rolePermissionController := controller.NewRolePermissionController(rolePermissionService)
+	taskController := controller.NewTaskController(taskService)
+	userTaskController := controller.NewUserTaskController(userTaskService)
 
 	// Set up router
 	r := chi.NewRouter()
@@ -67,6 +73,18 @@ func main() {
 		r.Get("/name/{name}", roleController.FindByName)
 	})
 
+	r.Route("/user-tasks", func(r chi.Router) {
+		r.Post("/", userTaskController.Create)
+		r.Get("/", userTaskController.GetAll)
+		r.Get("/{user_id}", userTaskController.GetByUserID)
+		r.Delete("/{user_id}", userTaskController.UnassignUserFromTask)
+	})
+
+	r.Route("/tasks", func(r chi.Router) {
+		r.Post("/", taskController.Create)
+		r.Get("/", taskController.GetAll)
+	})
+
 	r.Route("/permissions", func(r chi.Router) {
 		r.Use(mw.RoleMiddleware(rolePermRepo))
 		r.Post("/", permissionController.Create)
@@ -80,7 +98,8 @@ func main() {
 	})
 
 	r.Route("/users", func(r chi.Router) {
-		r.Use(mw.RoleMiddleware(rolePermRepo))
+		// r.Use(mw.RoleMiddleware(rolePermRepo))
+		r.Get("/count", userController.GetAllCount)
 		r.Post("/", userController.Create)
 		r.Get("/", userController.GetAll)
 		r.Get("/{id}", userController.GetByID)

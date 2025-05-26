@@ -1,10 +1,13 @@
-CREATE TABLE tasks (
+DROP TABLE IF EXISTS permissions CASCADE;
+
+
+CREATE TABLE IF NOT EXISTS tasks (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
-    project_id INT REFERENCES projects(id) ON DELETE SET NULL,
     status TEXT DEFAULT 'pending',
-    due_date DATE,
+    start_date DATE,
+    end_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

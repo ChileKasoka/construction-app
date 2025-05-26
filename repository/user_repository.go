@@ -66,6 +66,16 @@ func (r *UserRepository) GetAll() ([]model.User, error) {
 	return users, nil
 }
 
+func (r *UserRepository) GetAllCount() (int, error) {
+	query := `SELECT COUNT(*) FROM users`
+	var count int
+	err := r.DB.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *UserRepository) GetByID(id int) (*model.User, error) {
 	query := `
 	SELECT u.id, u.name, u.email, u.password, u.role_id, r.name, r.description, u.created_at

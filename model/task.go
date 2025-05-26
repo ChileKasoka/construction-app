@@ -6,10 +6,11 @@ type Task struct {
 	ID          int       `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	ProjectID   int       `json:"project_id"`
-	AssignedTo  []int     `json:"assigned_to"` // slice of user IDs
 	Status      string    `json:"status"`
-	DueDate     time.Time `json:"due_date"`
+	StartDate   time.Time `json:"start_date"`
+	EndDate     time.Time `json:"end_date"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+	AssignedTo  []int     `json:"assigned_to"`
+	ProjectID   *int      `json:"project_id"`
 }

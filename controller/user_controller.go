@@ -92,6 +92,17 @@ func (c *UserController) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+func (c *UserController) GetAllCount(w http.ResponseWriter, r *http.Request) {
+	count, err := c.Service.GetAllCount()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(count)
+}
+
 func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	user, err := c.Service.GetByID(id)

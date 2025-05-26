@@ -19,8 +19,10 @@ func NewProjectRepository(db *sql.DB) *ProjectRepository {
 
 func (r *ProjectRepository) GetAll() ([]model.Project, error) {
 	query := `
-	SELECT * FROM projects p
+	SELECT id, name, description, start_date, end_date, status, created_at
+	FROM projects
 	`
+
 	rows, err := r.DB.Query(query)
 	if err != nil {
 		return nil, err
@@ -29,7 +31,16 @@ func (r *ProjectRepository) GetAll() ([]model.Project, error) {
 	var projects []model.Project
 	for rows.Next() {
 		var project model.Project
-		err := rows.Scan(&project.ID, &project.Name, &project.Description, &project.StartDate, &project.EndDate, &project.Status)
+		err := rows.Scan(
+			&project.ID,
+			&project.Name,
+			&project.Description,
+			&project.StartDate,
+			&project.EndDate,
+			&project.Status,
+			&project.CreatedAt,
+			&project.UpdatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}

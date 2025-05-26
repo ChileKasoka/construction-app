@@ -56,6 +56,14 @@ func (s *UserService) GetAll() ([]model.User, error) {
 	return s.Repo.GetAll()
 }
 
+func (s *UserService) GetAllCount() (int, error) {
+	count, err := s.Repo.GetAllCount()
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (s *UserService) GetByID(id int) (*model.User, error) {
 	return s.Repo.GetByID(id)
 }
