@@ -21,6 +21,8 @@ func main() {
 	}
 	defer db.Close()
 
+	// cfg := config.LoadConfig()
+
 	// Set up repositories
 	rolePermRepo := repository.NewRolePerissionRepo(db)
 
@@ -83,6 +85,8 @@ func main() {
 	r.Route("/tasks", func(r chi.Router) {
 		r.Post("/", taskController.Create)
 		r.Get("/", taskController.GetAll)
+		r.Get("/{id}", taskController.GetByID)
+		r.Delete("/{id}", taskController.Delete)
 	})
 
 	r.Route("/permissions", func(r chi.Router) {

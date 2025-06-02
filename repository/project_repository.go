@@ -19,7 +19,7 @@ func NewProjectRepository(db *sql.DB) *ProjectRepository {
 
 func (r *ProjectRepository) GetAll() ([]model.Project, error) {
 	query := `
-	SELECT id, name, description, start_date, end_date, status, created_at
+	SELECT id, name, description, start_date, end_date, status, created_at, updated_at
 	FROM projects
 	`
 

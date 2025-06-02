@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -36,6 +37,8 @@ func (c *ProjectController) GetByID(w http.ResponseWriter, r *http.Request) {
 func (c *ProjectController) Create(w http.ResponseWriter, r *http.Request) {
 	var p model.Project
 	json.NewDecoder(r.Body).Decode(&p)
+	log.Printf("Decoded project: %+v\n", p) // <-- Add this
+
 	created, err := c.Service.Create(&p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
