@@ -80,6 +80,36 @@ func (c *TaskController) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (c *TaskController) Update(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid task ID", http.StatusBadRequest)
+		return
+	}
+
+	var task model.Task
+
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	if err := c.Service.Update(id, &task); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to update task: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Set the task ID so it's returned in the response
+	task.ID = id
+
+	// Return the updated task as JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(task)
+}
+
 func (c *TaskController) Delete(w http.ResponseWriter, r *http.Request) {
 	// Get task ID from URL
 	idStr := chi.URLParam(r, "id")

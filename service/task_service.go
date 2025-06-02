@@ -57,6 +57,24 @@ func (s *TaskService) GetAll() ([]model.Task, error) {
 	return tasks, nil
 }
 
+func (s *TaskService) Update(id int, req *model.Task) error {
+	// Basic validation (optional, expand as needed)
+	if req.Title == "" {
+		return errors.New("task title is required")
+	}
+
+	// Set updated timestamp
+	req.UpdatedAt = time.Now()
+
+	// Pass to repository
+	err := s.TaskRepo.Update(id, req)
+	if err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+
+	return nil
+}
+
 func (s *TaskService) Delete(id int) error {
 	return s.TaskRepo.Delete(id)
 }

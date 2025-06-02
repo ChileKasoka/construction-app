@@ -54,15 +54,14 @@ func (r *ProjectRepository) GetAll() ([]model.Project, error) {
 
 func (r *ProjectRepository) GetByID(id int) (*model.Project, error) {
 	query := `
-	SELECT p.id, p.name, p.description, p.start_date, p.end_date, p.status, u.id, u.name
-	FROM projects p
-	LEFT JOIN users u ON p.user_id = u.id
-	WHERE p.id = $1
-	`
+SELECT id, name, description, start_date, end_date, status
+FROM projects
+WHERE id = $1
+`
 	row := r.DB.QueryRow(query, id)
 	var project model.Project
-	var user model.User
-	err := row.Scan(&project.ID, &project.Name, &project.Description, &project.StartDate, &project.EndDate, &project.Status, &user.ID, &user.Name)
+	err := row.Scan(&project.ID, &project.Name, &project.Description, &project.StartDate, &project.EndDate, &project.Status)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("project not found")

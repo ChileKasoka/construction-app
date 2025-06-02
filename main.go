@@ -86,6 +86,7 @@ func main() {
 		r.Post("/", taskController.Create)
 		r.Get("/", taskController.GetAll)
 		r.Get("/{id}", taskController.GetByID)
+		r.Put("/{id}", taskController.Update)
 		r.Delete("/{id}", taskController.Delete)
 	})
 

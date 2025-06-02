@@ -96,6 +96,19 @@ func (r *TaskRepository) GetAll() ([]model.Task, error) {
 	return tasks, nil
 }
 
+func (r *TaskRepository) Update(id int, t *model.Task) error {
+	query := `
+		UPDATE tasks
+		SET title = $1, description = $2, status = $3, start_date = $4, end_date = $5, updated_at = NOW()
+		WHERE id = $6
+	`
+	_, err := r.DB.Exec(query, t.Title, t.Description, t.Status, t.StartDate, t.EndDate, id)
+	if err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+	return nil
+}
+
 func (r *TaskRepository) Delete(id int) error {
 	query := `DELETE FROM tasks WHERE id = $1`
 	_, err := r.DB.Exec(query, id)
