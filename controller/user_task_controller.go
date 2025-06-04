@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -13,6 +14,11 @@ import (
 
 type UserTaskController struct {
 	userTaskService *service.UserTaskService
+}
+
+type AssignTaskRequest struct {
+	TaskID  int   `json:"task_id"`
+	UserIDs []int `json:"user_ids"`
 }
 
 func NewUserTaskController(userTaskService *service.UserTaskService) *UserTaskController {
@@ -35,6 +41,34 @@ func (c *UserTaskController) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(userTask)
+}
+
+func (c *UserTaskController) AssignUsersToTaskHandler(w http.ResponseWriter, r *http.Request) {
+	taskIDStr := chi.URLParam(r, "id")
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		http.Error(w, "Invalid task ID", http.StatusBadRequest)
+		return
+	}
+
+	var req AssignTaskRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	req.TaskID = taskID
+
+	err = c.userTaskService.AssignUsersToTask(req.TaskID, req.UserIDs)
+	if err != nil {
+		log.Printf("AssignUsersToTask error: %v\n", err)
+		http.Error(w, "Failed to assign users to task: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated) // ✅ Proper status for POST creation
+	json.NewEncoder(w).Encode(map[string]string{"message": "Users assigned successfully"})
 }
 
 func (c *UserTaskController) GetAll(w http.ResponseWriter, r *http.Request) {

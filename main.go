@@ -88,6 +88,7 @@ func main() {
 		r.Get("/{id}", taskController.GetByID)
 		r.Put("/{id}", taskController.Update)
 		r.Delete("/{id}", taskController.Delete)
+		r.Post("/{id}/assign-users", userTaskController.AssignUsersToTaskHandler)
 	})
 
 	r.Route("/permissions", func(r chi.Router) {

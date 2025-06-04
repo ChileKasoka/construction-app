@@ -2,6 +2,8 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/ChileKasoka/construction-app/model"
 )
@@ -28,6 +30,28 @@ func (r *UserTaskRepository) Create(userTask *model.UserTask) error {
 		return err
 	}
 	return nil
+}
+
+func (r *UserTaskRepository) CreateMany(taskID int, userIDs []int) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	query := `INSERT INTO user_task (task_id, user_id) VALUES `
+	values := []any{}
+	placeholders := []string{}
+
+	for i, userID := range userIDs {
+		taskPos := i*2 + 1
+		userPos := i*2 + 2
+		placeholders = append(placeholders, fmt.Sprintf("($%d, $%d)", taskPos, userPos))
+		values = append(values, taskID, userID) // Repeats taskID for each user
+	}
+
+	fullQuery := query + strings.Join(placeholders, ", ")
+
+	_, err := r.DB.Exec(fullQuery, values...)
+	return err
 }
 
 func (r *UserTaskRepository) GetAll() ([]model.UserTask, error) {

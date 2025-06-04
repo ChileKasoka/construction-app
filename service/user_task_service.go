@@ -35,6 +35,14 @@ func (s *UserTaskService) Create(userTask *model.UserTask) error {
 	return nil
 }
 
+func (s *UserTaskService) AssignUsersToTask(taskID int, userIDs []int) error {
+	// Optional: validate userIDs or check if task exists
+	if len(userIDs) == 0 {
+		return nil
+	}
+	return s.userTaskRepo.CreateMany(taskID, userIDs)
+}
+
 func (s *UserTaskService) GetAll() ([]model.UserTask, error) {
 	userTasks, err := s.userTaskRepo.GetAll()
 	if err != nil {
