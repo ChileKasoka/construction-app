@@ -17,12 +17,19 @@ func NewTaskRepository(db *sql.DB) *TaskRepository {
 
 func (r *TaskRepository) Create(task *model.Task) error {
 	query := `
-	INSERT INTO tasks (title, description, status, start_date, end_date)
-	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id, created_at, updated_at
+		INSERT INTO tasks (title, description, status, start_date, end_date, project_id)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, created_at, updated_at
 	`
-	err := r.DB.QueryRow(query, task.Title, task.Description, task.Status, task.StartDate, task.EndDate).
-		Scan(&task.ID, &task.CreatedAt, &task.UpdatedAt)
+	err := r.DB.QueryRow(query,
+		task.Title,
+		task.Description,
+		task.Status,
+		task.StartDate,
+		task.EndDate,
+		task.ProjectID,
+	).Scan(&task.ID, &task.CreatedAt, &task.UpdatedAt)
+
 	if err != nil {
 		return fmt.Errorf("failed to insert task: %w", err)
 	}
@@ -35,7 +42,7 @@ func (r *TaskRepository) GetByID(id int) (*model.Task, error) {
 	query := `
 	SELECT 
 		id, title, description, status,
-		start_date, end_date, created_at, updated_at
+		start_date, end_date, created_at, updated_at, project_id
 	FROM tasks
 	WHERE id = $1
 	`
@@ -48,6 +55,7 @@ func (r *TaskRepository) GetByID(id int) (*model.Task, error) {
 		&task.EndDate,
 		&task.CreatedAt,
 		&task.UpdatedAt,
+		&task.ProjectID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get task: %w", err)
@@ -59,7 +67,7 @@ func (r *TaskRepository) GetAll() ([]model.Task, error) {
 	query := `
 		SELECT 
 			id, title, description, status,
-			start_date, end_date, created_at, updated_at
+			start_date, end_date, created_at, updated_at, project_id
 		FROM tasks
 	`
 	rows, err := r.DB.Query(query)
@@ -81,6 +89,7 @@ func (r *TaskRepository) GetAll() ([]model.Task, error) {
 			&task.EndDate,
 			&task.CreatedAt,
 			&task.UpdatedAt,
+			&task.ProjectID,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan task: %w", err)
@@ -99,10 +108,10 @@ func (r *TaskRepository) GetAll() ([]model.Task, error) {
 func (r *TaskRepository) Update(id int, t *model.Task) error {
 	query := `
 		UPDATE tasks
-		SET title = $1, description = $2, status = $3, start_date = $4, end_date = $5, updated_at = NOW()
-		WHERE id = $6
+		SET title = $1, description = $2, status = $3, start_date = $4, end_date = $5, project_id = $6, updated_at = NOW()
+		WHERE id = $7
 	`
-	_, err := r.DB.Exec(query, t.Title, t.Description, t.Status, t.StartDate, t.EndDate, id)
+	_, err := r.DB.Exec(query, t.Title, t.Description, t.Status, t.StartDate, t.EndDate, t.ProjectID, id)
 	if err != nil {
 		return fmt.Errorf("failed to update task: %w", err)
 	}

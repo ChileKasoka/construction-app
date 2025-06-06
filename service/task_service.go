@@ -14,7 +14,9 @@ type TaskService struct {
 }
 
 func NewTaskService(service *repository.TaskRepository) *TaskService {
-	return &TaskService{TaskRepo: service}
+	return &TaskService{
+		TaskRepo: service,
+	}
 }
 
 func (s *TaskService) Create(req model.Task) error {
