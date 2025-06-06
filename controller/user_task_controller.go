@@ -83,13 +83,12 @@ func (c *UserTaskController) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserTaskController) GetByUserID(w http.ResponseWriter, r *http.Request) {
-	userIDStr := r.URL.Query().Get("user_id")
+	userIDStr := chi.URLParam(r, "id")
 	if userIDStr == "" {
 		http.Error(w, "User ID is required", http.StatusBadRequest)
 		return
 	}
 
-	// Convert userID from string to int
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)

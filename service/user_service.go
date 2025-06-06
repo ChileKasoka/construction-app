@@ -68,31 +68,23 @@ func (s *UserService) GetByID(id int) (*model.User, error) {
 	return s.Repo.GetByID(id)
 }
 
-func (s *UserService) Authenticate(email, password string) (string, string, string, int, error) {
-	// Fetch user by email
+func (s *UserService) Authenticate(email, password string) (string, int, string, model.User, int, error) {
 	user, err := s.Repo.FindByEmail(email)
 	if err != nil {
-		return "", "", "", 0, errors.New("invalid email or password")
+		return "", 0, "", model.User{}, 0, errors.New("invalid email or password")
 	}
 
 	role, err := s.RoleRepo.GetByID(user.RoleID)
 	if err != nil {
-		return "", "", "", 0, errors.New("role not found")
+		return "", 0, "", model.User{}, 0, errors.New("role not found")
 	}
 
-	// Compare hashed password
-	// err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	// if err != nil {
-	// 	return "", "", errors.New("invalid email or password")
-	// }
-
-	// Generate JWT token
-	token, err := auth.CreateJWT(user.ID, user.Role.Name, role.ID)
+	token, err := auth.CreateJWT(user.ID, role.Name, role.ID)
 	if err != nil {
-		return "", "", "", 0, errors.New("failed to generate token")
+		return "", 0, "", model.User{}, 0, errors.New("failed to generate token")
 	}
 
-	return token, user.Role.Name, user.Name, role.ID, nil
+	return token, user.ID, role.Name, *user, role.ID, nil
 }
 
 func (s *UserService) Update(user model.User) error {

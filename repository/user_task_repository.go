@@ -57,7 +57,7 @@ func (r *UserTaskRepository) CreateMany(taskID int, userIDs []int) error {
 func (r *UserTaskRepository) GetAll() ([]model.UserTask, error) {
 	query := `
 	SELECT task_id, user_id
-	FROM user_tasks
+	FROM user_task
 	`
 
 	rows, err := r.DB.Query(query)
@@ -85,9 +85,11 @@ func (r *UserTaskRepository) GetAll() ([]model.UserTask, error) {
 
 func (r *UserTaskRepository) GetByUserID(userID int) ([]model.UserTask, error) {
 	query := `
-	SELECT task_id, user_id
-	FROM user_tasks
-	WHERE user_id = $1
+		SELECT t.id AS task_id, t.title AS task_title, t.description AS task_description, ut.user_id
+		FROM user_task ut
+		JOIN tasks t ON ut.task_id = t.id
+		WHERE ut.user_id = $1
+		ORDER BY t.id
 	`
 
 	rows, err := r.DB.Query(query, userID)
@@ -99,11 +101,12 @@ func (r *UserTaskRepository) GetByUserID(userID int) ([]model.UserTask, error) {
 	var userTasks []model.UserTask
 	for rows.Next() {
 		var userTask model.UserTask
-		err := rows.Scan(&userTask.TaskID, &userTask.UserID)
+		err := rows.Scan(&userTask.TaskID, &userTask.Title, &userTask.Description, &userTask.UserID)
 		if err != nil {
 			return nil, err
 		}
 		userTasks = append(userTasks, userTask)
+		fmt.Printf("UserTask: %+v\n", userTask) // Debugging output
 	}
 
 	if err := rows.Err(); err != nil {
@@ -114,7 +117,7 @@ func (r *UserTaskRepository) GetByUserID(userID int) ([]model.UserTask, error) {
 }
 
 func (r *UserTaskRepository) UnassignUser(taskID, userID int) error {
-	query := `DELETE FROM task_assignees WHERE task_id = $1 AND user_id = $2`
+	query := `DELETE FROM user_task WHERE task_id = $1 AND user_id = $2`
 	_, err := r.DB.Exec(query, taskID, userID)
 	return err
 }

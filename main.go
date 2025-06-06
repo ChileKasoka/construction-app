@@ -78,7 +78,7 @@ func main() {
 	r.Route("/user-tasks", func(r chi.Router) {
 		r.Post("/", userTaskController.Create)
 		r.Get("/", userTaskController.GetAll)
-		r.Get("/{user_id}", userTaskController.GetByUserID)
+		r.Get("/{id}", userTaskController.GetByUserID)
 		r.Delete("/{user_id}", userTaskController.UnassignUserFromTask)
 	})
 

@@ -15,10 +15,11 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
-	Role        string `json:"role"`
-	User        string `json:"user"`
-	RoleID      int    `json:"role_id"`
+	ID          int        `json:"id"`
+	AccessToken string     `json:"access_token"`
+	Role        string     `json:"role"`
+	User        model.User `json:"user"`
+	RoleID      int        `json:"role_id"`
 }
 
 type RegisterResponse struct {
@@ -69,13 +70,14 @@ func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, role, user, roleID, err := c.Service.Authenticate(req.Email, req.Password)
+	accessToken, _, role, user, roleID, err := c.Service.Authenticate(req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
 	res := LoginResponse{
+		ID:          user.ID,
 		AccessToken: accessToken,
 		Role:        role,
 		User:        user,
@@ -83,7 +85,6 @@ func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(res)
 }
 
