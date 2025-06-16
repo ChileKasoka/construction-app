@@ -15,11 +15,12 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 type LoginResponse struct {
-	ID          int        `json:"id"`
-	AccessToken string     `json:"access_token"`
-	Role        string     `json:"role"`
-	User        model.User `json:"user"`
-	RoleID      int        `json:"role_id"`
+	ID          int                `json:"id"`
+	AccessToken string             `json:"access_token"`
+	Role        string             `json:"role"`
+	User        model.User         `json:"user"`
+	RoleID      int                `json:"role_id"`
+	Permissions []model.Permission `json:"permissions"`
 }
 
 type RegisterResponse struct {
@@ -37,12 +38,16 @@ type UserResponse struct {
 }
 
 type UserController struct {
-	Service   *service.UserService
-	JWTSecret string
+	Service               *service.UserService
+	RolePermissionService *service.RolePermissionService
+	JWTSecret             string
 }
 
-func NewUserController(service *service.UserService) *UserController {
-	return &UserController{Service: service}
+func NewUserController(service *service.UserService, rolePermissionService *service.RolePermissionService) *UserController {
+	return &UserController{
+		Service:               service,
+		RolePermissionService: rolePermissionService,
+	}
 }
 
 func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +81,18 @@ func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	permissions, err := c.RolePermissionService.ListPermissions(roleID)
+	if err != nil {
+		http.Error(w, "failed to fetch permissions", http.StatusInternalServerError)
+		return
+	}
+
 	res := LoginResponse{
 		ID:          user.ID,
 		AccessToken: accessToken,
 		Role:        role,
 		User:        user,
+		Permissions: permissions,
 		RoleID:      roleID,
 	}
 

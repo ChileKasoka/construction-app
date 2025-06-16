@@ -79,3 +79,25 @@ func (c *RolePermissionController) ListAllRolePermissions(w http.ResponseWriter,
 	}
 	json.NewEncoder(w).Encode(result)
 }
+
+func (c *RolePermissionController) GetByUserID(w http.ResponseWriter, r *http.Request) {
+	userIDStr := chi.URLParam(r, "id")
+	if userIDStr == "" {
+		http.Error(w, "User ID is required", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	permissions, err := c.Service.GetByUserID(userID)
+	if err != nil {
+		http.Error(w, "could not fetch user permissions", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(permissions)
+}

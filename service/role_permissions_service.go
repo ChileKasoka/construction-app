@@ -28,3 +28,7 @@ func (s *RolePermissionService) ListPermissions(roleID int) ([]model.Permission,
 func (s *RolePermissionService) GetAllRolePermissions() ([]repository.RolePermissionDisplay, error) {
 	return s.Repo.GetAllRolePermissions()
 }
+
+func (s *RolePermissionService) GetByUserID(userID int) ([]*model.UserPermission, error) {
+	return s.Repo.GetByUserID(userID)
+}

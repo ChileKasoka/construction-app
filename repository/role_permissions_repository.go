@@ -158,3 +158,51 @@ func (r *RolePermissionRepo) GetAllRolePermissions() ([]RolePermissionDisplay, e
 
 	return result, nil
 }
+
+func (r *RolePermissionRepo) GetByUserID(id int) ([]*model.UserPermission, error) {
+	query := `
+		SELECT 
+			u.id AS user_id,
+			u.name AS user_name,
+			r.name AS role_name,
+			p.id AS permission_id,
+			p.name AS permission_name,
+			p.path,
+			p.method
+		FROM users u
+		JOIN roles r ON u.role_id = r.id
+		JOIN role_permissions rp ON rp.role_id = r.id
+		JOIN permissions p ON rp.permission_id = p.id
+		WHERE u.id = $1;
+	`
+
+	rows, err := r.DB.Query(query, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var permissions []*model.UserPermission
+	for rows.Next() {
+		var up model.UserPermission
+		err := rows.Scan(
+			&up.UserID,
+			&up.UserName,
+			&up.RoleName,
+			&up.PermissionID,
+			&up.PermissionName,
+			&up.Path,
+			&up.Method,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		permissions = append(permissions, &up)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return permissions, nil
+}

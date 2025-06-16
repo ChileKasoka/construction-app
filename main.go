@@ -44,7 +44,7 @@ func main() {
 	userTaskService := service.NewUserTaskService(userTaskRepo, taskRepo)
 
 	// Set up controllers
-	userController := controller.NewUserController(userService)
+	userController := controller.NewUserController(userService, rolePermissionService)
 	projectController := controller.NewProjectController(projectService)
 	roleController := controller.NewRoleController(roleService)
 	permissionController := controller.NewPermissionController(permissionService)
@@ -95,12 +95,15 @@ func main() {
 		r.Use(mw.RoleMiddleware(rolePermRepo))
 		r.Post("/", permissionController.Create)
 		r.Get("/", permissionController.GetAll)
+		r.Get("/{id}", permissionController.GetByID)
 	})
 
 	r.Route("/role-permissions", func(r chi.Router) {
 		r.Use(mw.RoleMiddleware(rolePermRepo))
-		r.Post("/{roleID}", rolePermissionController.AssignPermission)
+		r.Post("/{id}", rolePermissionController.AssignPermission)
 		r.Get("/", rolePermissionController.ListAllRolePermissions)
+		r.Get("/{id}/permissions", rolePermissionController.ListPermissions)
+		r.Get("/{id}", rolePermissionController.GetByUserID)
 	})
 
 	r.Route("/users", func(r chi.Router) {
