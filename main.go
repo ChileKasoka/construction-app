@@ -33,6 +33,7 @@ func main() {
 	rolePermissionRepo := repository.NewRolePerissionRepo(db)
 	taskRepo := repository.NewTaskRepository(db)
 	userTaskRepo := repository.NewUserTaskRepository(db)
+	userProjectRepo := repository.NewUserProjectRepository(db)
 
 	// Set up services
 	userService := service.NewUserService(userRepo, roleRepo)
@@ -42,6 +43,7 @@ func main() {
 	rolePermissionService := service.NewRolePermissionService(rolePermissionRepo)
 	taskService := service.NewTaskService(taskRepo)
 	userTaskService := service.NewUserTaskService(userTaskRepo, taskRepo)
+	userProjectService := service.NewUserProjectService(userProjectRepo)
 
 	// Set up controllers
 	userController := controller.NewUserController(userService, rolePermissionService)
@@ -51,6 +53,7 @@ func main() {
 	rolePermissionController := controller.NewRolePermissionController(rolePermissionService)
 	taskController := controller.NewTaskController(taskService)
 	userTaskController := controller.NewUserTaskController(userTaskService)
+	userProjectController := controller.NewUserProjectController(userProjectService)
 
 	// Set up router
 	r := chi.NewRouter()
@@ -80,6 +83,14 @@ func main() {
 		r.Get("/", userTaskController.GetAll)
 		r.Get("/{id}", userTaskController.GetByUserID)
 		r.Delete("/{user_id}", userTaskController.UnassignUserFromTask)
+	})
+
+	r.Route("/user-projects", func(r chi.Router) {
+		r.Post("/{projectID}/assign-users", userProjectController.Create)
+		r.Post("/{projectID}/many", userProjectController.CreateMany)
+		r.Get("/", userProjectController.GetAll)
+		// r.Get("/{user_id}/projects", userProjectController.GetByProjectID)
+		r.Get("/{user_id}/projects", userProjectController.GetByUserID)
 	})
 
 	r.Route("/tasks", func(r chi.Router) {

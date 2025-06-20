@@ -8,6 +8,7 @@ type User struct {
 	Email     string    `json:"email"`
 	Password  string    `json:"-"`
 	RoleID    int       `json:"role_id"`
+	Project   string    `json:"project,omitempty"` // Project name, if applicable
 	Role      *Role     `json:"role,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 }

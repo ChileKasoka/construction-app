@@ -85,7 +85,7 @@ func (r *UserTaskRepository) GetAll() ([]model.UserTask, error) {
 
 func (r *UserTaskRepository) GetByUserID(userID int) ([]model.UserTask, error) {
 	query := `
-		SELECT t.id AS task_id, t.title AS task_title, t.description AS task_description, ut.user_id
+		SELECT t.id AS task_id, t.title AS task_title, t.description AS task_description, t.start_date as start_date, t.end_date as end_date, ut.user_id
 		FROM user_task ut
 		JOIN tasks t ON ut.task_id = t.id
 		WHERE ut.user_id = $1
@@ -101,7 +101,7 @@ func (r *UserTaskRepository) GetByUserID(userID int) ([]model.UserTask, error) {
 	var userTasks []model.UserTask
 	for rows.Next() {
 		var userTask model.UserTask
-		err := rows.Scan(&userTask.TaskID, &userTask.Title, &userTask.Description, &userTask.UserID)
+		err := rows.Scan(&userTask.TaskID, &userTask.Title, &userTask.Description, &userTask.StartDate, &userTask.EndDate, &userTask.UserID)
 		if err != nil {
 			return nil, err
 		}
