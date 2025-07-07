@@ -57,15 +57,23 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// role, err :=
-
-	err := c.Service.Create(user)
+	// Let the service handle password hashing & user creation
+	plainPassword, err := c.Service.Create(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Don't include hashed password in response
+	user.Password = ""
+
+	response := map[string]interface{}{
+		"user":     user,
+		"password": plainPassword, // plain password shown once
+	}
+
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {

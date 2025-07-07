@@ -7,6 +7,7 @@ import (
 	"github.com/ChileKasoka/construction-app/middleware/auth"
 	"github.com/ChileKasoka/construction-app/model"
 	"github.com/ChileKasoka/construction-app/repository"
+	"golang.org/x/crypto/bcrypt"
 	// "golang.org/x/crypto/bcrypt"
 )
 
@@ -31,25 +32,36 @@ func generateRandomPassword(n int) string {
 	return string(password)
 }
 
-func (s *UserService) Create(req model.RegisterRequest) error {
-	// TODO: add validation or email uniqueness check if needed
-
+func (s *UserService) Create(req model.RegisterRequest) (string, error) {
 	role, err := s.RoleRepo.GetByID(req.RoleID)
 	if err != nil {
-		return errors.New("role not found")
+		return "", errors.New("role not found")
 	}
 
 	password := req.Password
-	if req.Password == "" {
+	if password == "" {
 		password = generateRandomPassword(10)
 	}
+
+	// Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", errors.New("failed to hash password")
+	}
+
 	user := &model.RegisterRequest{
 		Name:     req.Name,
 		Email:    req.Email,
-		Password: password,
+		Password: string(hashedPassword),
 		RoleID:   role.ID,
 	}
-	return s.Repo.Create(user)
+
+	err = s.Repo.Create(user)
+	if err != nil {
+		return "", err
+	}
+
+	return password, nil // return plain password once
 }
 
 func (s *UserService) GetAll() ([]model.User, error) {
@@ -71,6 +83,12 @@ func (s *UserService) GetByID(id int) (*model.User, error) {
 func (s *UserService) Authenticate(email, password string) (string, int, string, model.User, int, error) {
 	user, err := s.Repo.FindByEmail(email)
 	if err != nil {
+		return "", 0, "", model.User{}, 0, errors.New("invalid email or password")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		// Don't reveal which part is incorrect (email or password)
 		return "", 0, "", model.User{}, 0, errors.New("invalid email or password")
 	}
 

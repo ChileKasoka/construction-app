@@ -9,10 +9,18 @@ import (
 	mw "github.com/ChileKasoka/construction-app/middleware"
 	"github.com/ChileKasoka/construction-app/repository"
 	"github.com/ChileKasoka/construction-app/service"
+	"github.com/joho/godotenv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found (fallback to system env)")
+	}
+}
 
 func main() {
 	db, err := db.ConnectDb()
