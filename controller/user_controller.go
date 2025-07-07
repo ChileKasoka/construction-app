@@ -65,7 +65,7 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Don't include hashed password in response
-	user.Password = ""
+	// user.Password = ""
 
 	response := map[string]interface{}{
 		"user":     user,

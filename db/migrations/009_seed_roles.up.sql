@@ -13,3 +13,11 @@ INSERT INTO roles (name, description) VALUES
 ('Labor Officer', 'To manage labor force activities on-site, including recruitment, attendance, payroll coordination, and resolving labor-related issues, ensuring the workforce operates efficiently and in compliance with labor laws.'),
 ('Accountant', 'To manage financial records, process invoices and payments, track project budgets, and ensure accurate accounting in compliance with company policies and accounting standards.')
 ON CONFLICT DO NOTHING;
+
+INSERT INTO users (name, email, password, role_id)
+VALUES (
+  'Admin',
+  'admin@site.com',
+  '$2a$10$ye6fCR92SCGqILkWYMxHqOmTayOLu5TriJ.LDZ9fiqWYDLWV9nmrS', -- bcrypt hash of Admin123!
+  1
+)
