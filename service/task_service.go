@@ -59,6 +59,14 @@ func (s *TaskService) GetAll() ([]model.Task, error) {
 	return tasks, nil
 }
 
+func (s *TaskService) GetAllCount() (int, error) {
+	count, err := s.TaskRepo.GetAllCount()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get task count: %w", err)
+	}
+	return count, nil
+}
+
 func (s *TaskService) Update(id int, req *model.Task) error {
 	// Basic validation (optional, expand as needed)
 	if req.Title == "" {

@@ -2,13 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 
 	"github.com/ChileKasoka/construction-app/middleware/auth"
 	"github.com/ChileKasoka/construction-app/model"
 	"github.com/ChileKasoka/construction-app/repository"
+	email "github.com/ChileKasoka/construction-app/util"
 	"golang.org/x/crypto/bcrypt"
-	// "golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -43,7 +44,6 @@ func (s *UserService) Create(req model.RegisterRequest) (string, error) {
 		password = generateRandomPassword(10)
 	}
 
-	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", errors.New("failed to hash password")
@@ -54,6 +54,7 @@ func (s *UserService) Create(req model.RegisterRequest) (string, error) {
 		Email:    req.Email,
 		Password: string(hashedPassword),
 		RoleID:   role.ID,
+		// CreatedBy: req.CreatedBy, // Creator's email passed in request
 	}
 
 	err = s.Repo.Create(user)
@@ -61,7 +62,19 @@ func (s *UserService) Create(req model.RegisterRequest) (string, error) {
 		return "", err
 	}
 
-	return password, nil // return plain password once
+	message := fmt.Sprintf(`
+		<p>Hello %s,</p>
+		<p>Your account has been created.</p>
+		<p><strong>Email:</strong> %s</p>
+		<p><strong>Password:</strong> %s</p>
+		<p>You can now login and change your password.</p>
+	`, req.Name, req.Email, password)
+
+	// Send email to user and creator (non-blocking)
+	go email.SendEmail(req.Email, "Your Account Credentials", message)
+	// go email.SendEmail(req.CreatedBy, "User Created: "+req.Email, message)
+
+	return password, nil
 }
 
 func (s *UserService) GetAll() ([]model.User, error) {

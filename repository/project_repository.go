@@ -72,6 +72,16 @@ WHERE id = $1
 	return &project, nil
 }
 
+func (r *ProjectRepository) GetAllCount() (int, error) {
+	query := `SELECT COUNT(*) FROM projects`
+	var count int
+	err := r.DB.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *ProjectRepository) Create(p *model.Project) (*model.Project, error) {
 	query := `
 	INSERT INTO projects (name, description, start_date, end_date, status)

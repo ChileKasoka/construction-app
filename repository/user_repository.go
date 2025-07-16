@@ -129,11 +129,15 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 }
 
 func (r *UserRepository) Update(user model.User) error {
-	query := `
-	UPDATE users SET name=$1, email=$2, password=$3, role_id=$4 WHERE id=$5
-	`
-	_, err := r.DB.Exec(query, user.Name, user.Email, user.Password, user.RoleID, user.ID)
-	return err
+	if user.Password == "" {
+		query := `UPDATE users SET name=$1, email=$2, role_id=$3 WHERE id=$4`
+		_, err := r.DB.Exec(query, user.Name, user.Email, user.RoleID, user.ID)
+		return err
+	} else {
+		query := `UPDATE users SET name=$1, email=$2, password=$3, role_id=$4 WHERE id=$5`
+		_, err := r.DB.Exec(query, user.Name, user.Email, user.Password, user.RoleID, user.ID)
+		return err
+	}
 }
 
 func (r *UserRepository) Delete(id int) error {

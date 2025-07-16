@@ -34,6 +34,15 @@ func (c *ProjectController) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(project)
 }
 
+func (c *ProjectController) GetAllCount(w http.ResponseWriter, r *http.Request) {
+	count, err := c.Service.GetAllCount()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]int{"count": count})
+}
+
 func (c *ProjectController) Create(w http.ResponseWriter, r *http.Request) {
 	var p model.Project
 	json.NewDecoder(r.Body).Decode(&p)

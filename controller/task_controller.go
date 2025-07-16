@@ -80,6 +80,18 @@ func (c *TaskController) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (c *TaskController) GetAllCount(w http.ResponseWriter, r *http.Request) {
+	count, err := c.Service.GetAllCount()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get task count: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with count as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]int{"count": count})
+}
+
 func (c *TaskController) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idStr)

@@ -21,6 +21,10 @@ func (s *ProjectService) GetByID(id int) (*model.Project, error) {
 	return s.Repo.GetByID(id)
 }
 
+func (s *ProjectService) GetAllCount() (int, error) {
+	return s.Repo.GetAllCount()
+}
+
 func (s *ProjectService) Create(p *model.Project) (*model.Project, error) {
 	return s.Repo.Create(p)
 }

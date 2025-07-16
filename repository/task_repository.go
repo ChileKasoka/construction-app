@@ -105,6 +105,16 @@ func (r *TaskRepository) GetAll() ([]model.Task, error) {
 	return tasks, nil
 }
 
+func (r *TaskRepository) GetAllCount() (int, error) {
+	query := `SELECT COUNT(*) FROM tasks`
+	var count int
+	err := r.DB.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get task count: %w", err)
+	}
+	return count, nil
+}
+
 func (r *TaskRepository) Update(id int, t *model.Task) error {
 	query := `
 		UPDATE tasks

@@ -20,4 +20,5 @@ type RegisterRequest struct {
 	Password  string    `json:"password"`
 	RoleID    int       `json:"role_id"`
 	CreatedAt time.Time `json:"created_at"`
+	// CreatedBy string    `json:"created_by,omitempty"` // User who created this record
 }
