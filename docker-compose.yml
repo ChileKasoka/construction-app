@@ -48,17 +48,17 @@ services:
     networks:
       - cmis-net
 
-  caddy:
-    image: caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-    depends_on:
-      - app
-    networks:
-      - cmis-net
+  # caddy:
+  #   image: caddy
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile
+  #   depends_on:
+  #     - app
+  #   networks:
+  #     - cmis-net
 
 volumes:
   cmispg_data:
