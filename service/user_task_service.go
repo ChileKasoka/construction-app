@@ -20,7 +20,7 @@ func NewUserTaskService(repo *repository.UserTaskRepository, repoTask *repositor
 }
 
 func (s *UserTaskService) Create(userTask *model.UserTask) error {
-	task, err := s.taskRepo.GetByID(userTask.TaskID)
+	task, err := s.taskRepo.GetTaskByID(userTask.TaskID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch task: %w", err)
 	}

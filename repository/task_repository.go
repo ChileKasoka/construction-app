@@ -36,7 +36,7 @@ func (r *TaskRepository) Create(task *model.Task) error {
 	return nil
 }
 
-func (r *TaskRepository) GetByID(id int) (*model.Task, error) {
+func (r *TaskRepository) GetTaskByID(id int) (*model.Task, error) {
 	var task model.Task
 
 	query := `

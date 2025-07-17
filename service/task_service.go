@@ -40,7 +40,7 @@ func (s *TaskService) Create(req model.Task) error {
 }
 
 func (s *TaskService) GetByID(id int) (model.Task, error) {
-	task, err := s.TaskRepo.GetByID(id)
+	task, err := s.TaskRepo.GetTaskByID(id)
 	if err != nil {
 		return model.Task{}, fmt.Errorf("failed to fetch task: %w", err)
 	}
