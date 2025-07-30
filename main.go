@@ -91,6 +91,7 @@ func main() {
 		r.Post("/", userTaskController.Create)
 		r.Get("/", userTaskController.GetAll)
 		r.Get("/{id}", userTaskController.GetByUserID)
+		r.Get("/task/{id}", userTaskController.GetByTaskID)
 		r.Delete("/{user_id}", userTaskController.UnassignUserFromTask)
 	})
 
@@ -98,7 +99,7 @@ func main() {
 		r.Post("/{projectID}/assign-users", userProjectController.Create)
 		r.Post("/{projectID}/many", userProjectController.CreateMany)
 		r.Get("/", userProjectController.GetAll)
-		// r.Get("/{user_id}/projects", userProjectController.GetByProjectID)
+		r.Get("/project/{id}", userProjectController.GetByProjectID)
 		r.Get("/{user_id}/projects", userProjectController.GetByUserID)
 	})
 

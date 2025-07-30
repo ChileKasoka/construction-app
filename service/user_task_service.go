@@ -59,6 +59,14 @@ func (s *UserTaskService) GetByUserID(userID int) ([]model.UserTask, error) {
 	return userTasks, nil
 }
 
+func (s *UserTaskService) GetByTaskID(taskID int) ([]model.TaskUsers, error) {
+	taskUsers, err := s.userTaskRepo.GetByTaskID(taskID)
+	if err != nil {
+		return nil, err
+	}
+	return taskUsers, nil
+}
+
 func (s *UserTaskService) UnassignUser(userID, taskID int) error {
 	err := s.userTaskRepo.UnassignUser(userID, taskID)
 	if err != nil {

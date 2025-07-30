@@ -69,7 +69,7 @@ func (c *UserProjectController) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserProjectController) GetByProjectID(w http.ResponseWriter, r *http.Request) {
-	projectIDStr := chi.URLParam(r, "projectID")
+	projectIDStr := chi.URLParam(r, "id")
 	projectID, err := strconv.Atoi(projectIDStr)
 	if err != nil {
 		http.Error(w, "Invalid project ID", http.StatusBadRequest)

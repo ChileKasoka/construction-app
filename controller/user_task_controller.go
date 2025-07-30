@@ -105,6 +105,29 @@ func (c *UserTaskController) GetByUserID(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(userTasks)
 }
 
+func (c *UserTaskController) GetByTaskID(w http.ResponseWriter, r *http.Request) {
+	taskIDStr := chi.URLParam(r, "id")
+	if taskIDStr == "" {
+		http.Error(w, "Task ID is required", http.StatusBadRequest)
+		return
+	}
+
+	taskID, err := strconv.Atoi(taskIDStr)
+	if err != nil {
+		http.Error(w, "Invalid task ID", http.StatusBadRequest)
+		return
+	}
+
+	userTasks, err := c.userTaskService.GetByTaskID(taskID)
+	if err != nil {
+		http.Error(w, "Failed to fetch user tasks for task", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(userTasks)
+}
+
 func (h *UserTaskController) UnassignUserFromTask(w http.ResponseWriter, r *http.Request) {
 	// Get userID and taskID from URL params
 	userIDParam := chi.URLParam(r, "userID")

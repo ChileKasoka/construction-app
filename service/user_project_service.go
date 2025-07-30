@@ -36,7 +36,7 @@ func (s *UserProjectService) GetAll() ([]model.User, error) {
 	return s.userProjectRepo.GetAll()
 }
 
-func (s *UserProjectService) GetByProjectID(projectID int) ([]model.User, error) {
+func (s *UserProjectService) GetByProjectID(projectID int) ([]model.ProjectUsers, error) {
 	return s.userProjectRepo.GetByProjectID(projectID)
 }
 

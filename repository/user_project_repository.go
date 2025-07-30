@@ -94,12 +94,12 @@ func (r *UserProjectRepository) GetAll() ([]model.User, error) {
 	return users, nil
 }
 
-func (r *UserProjectRepository) GetByProjectID(projectID int) ([]model.User, error) {
+func (r *UserProjectRepository) GetByProjectID(projectID int) ([]model.ProjectUsers, error) {
 	query := `
-	SELECT u.id, u.name, u.email, u.password, pr.name as project, u.role_id, r.name, r.description, u.created_at
+	SELECT u.id AS user_id, u.name AS user_name, u.email AS user_email, pr.id AS project_id, pr.name AS project, r.name AS role_name
 	FROM user_project up
 	JOIN users u ON up.user_id = u.id
-    JOIN projects pr ON up.project_id = pr.id
+	JOIN projects pr ON up.project_id = pr.id
 	LEFT JOIN roles r ON u.role_id = r.id
 	WHERE up.project_id = $1
 	ORDER BY u.id
@@ -111,22 +111,24 @@ func (r *UserProjectRepository) GetByProjectID(projectID int) ([]model.User, err
 	}
 	defer rows.Close()
 
-	var users []model.User
+	var users []model.ProjectUsers
 
 	for rows.Next() {
-		var user model.User
-		var role model.Role
-		var project model.Project
+		var projectUser model.ProjectUsers
 
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &project.Name, &user.RoleID, &role.Name, &role.Description, &user.CreatedAt)
+		err := rows.Scan(
+			&projectUser.UserID,
+			&projectUser.UserName,
+			&projectUser.UserEmail,
+			&projectUser.ProjectID,
+			&projectUser.Project,
+			&projectUser.RoleName,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		role.ID = user.RoleID
-		user.Role = &role
-
-		users = append(users, user)
+		users = append(users, projectUser)
 	}
 
 	if err = rows.Err(); err != nil {

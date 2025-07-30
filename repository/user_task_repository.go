@@ -116,6 +116,38 @@ func (r *UserTaskRepository) GetByUserID(userID int) ([]model.UserTask, error) {
 	return userTasks, nil
 }
 
+func (r *UserTaskRepository) GetByTaskID(taskID int) ([]model.TaskUsers, error) {
+	query := `
+	SELECT user_id, u.name AS user_name, u.email AS user_email
+	FROM user_task
+	JOIN users u ON user_task.user_id = u.id
+	WHERE task_id = $1
+	`
+
+	rows, err := r.DB.Query(query, taskID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var taskUsers []model.TaskUsers
+	for rows.Next() {
+		var taskUser model.TaskUsers
+		err := rows.Scan(&taskUser.UserID, &taskUser.UserName, &taskUser.UserEmail)
+		if err != nil {
+			return nil, err
+		}
+		taskUser.TaskID = taskID // Set the TaskID for each UserTask
+		taskUsers = append(taskUsers, taskUser)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return taskUsers, nil
+}
+
 func (r *UserTaskRepository) UnassignUser(taskID, userID int) error {
 	query := `DELETE FROM user_task WHERE task_id = $1 AND user_id = $2`
 	_, err := r.DB.Exec(query, taskID, userID)
