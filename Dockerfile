@@ -3,31 +3,32 @@ FROM golang:1.24-alpine AS builder
 
 WORKDIR /construction-app
 
-# Install git and other dependencies
-RUN apk add --no-cache git
+# Install git and build tools
+RUN apk add --no-cache git build-base
 
-# Copy go.mod and go.sum files
+# Copy go mod files first for better layer caching
 COPY go.mod go.sum ./
 
-# Download dependencies
+# Download Go modules
 RUN go mod download
 
-# Copy the source code
+# Copy the rest of the source code
 COPY . .
 
-# Build the application
-RUN go build -x -v -o main .
+# Build the Go application
+RUN go build -o main .
 
-# Stage 2: Create a lightweight container
+# Stage 2: Create a minimal container with the binary
 FROM alpine:latest
 
+# Set working directory
 WORKDIR /construction-app
 
-# Copy the binary from the builder
+# Copy the built binary from the builder stage
 COPY --from=builder /construction-app/main .
 
-# Expose application port
+# Expose the application port
 EXPOSE 8080
 
-# Run the binary
+# Set entrypoint
 CMD ["./main"]
