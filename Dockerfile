@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN go build -o main .
+RUN go build -x -v -o main .
 
 # Stage 2: Create a lightweight container
 FROM alpine:latest
