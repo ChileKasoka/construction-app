@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN go build -o main .
+RUN go build -x -v -o main .
 
 # Stage 2: Create a minimal container with the binary
 FROM alpine:latest
