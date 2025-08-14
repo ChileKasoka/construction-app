@@ -25,6 +25,10 @@ func (s *PermissionService) GetByID(id int64) (*model.Permission, error) {
 	return s.Repo.GetByID(id)
 }
 
+func (s *PermissionService) GetUnassignedByRoleID(roleID int) ([]model.Permission, error) {
+	return s.Repo.GetUnassignedByRoleID(roleID)
+}
+
 func (s *PermissionService) Update(p *model.Permission) error {
 	return s.Repo.Update(p)
 }

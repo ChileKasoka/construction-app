@@ -114,10 +114,11 @@ func main() {
 	})
 
 	r.Route("/permissions", func(r chi.Router) {
-		r.Use(mw.RoleMiddleware(rolePermRepo))
+		// r.Use(mw.RoleMiddleware(rolePermRepo))
 		r.Post("/", permissionController.Create)
 		r.Get("/", permissionController.GetAll)
 		r.Get("/{id}", permissionController.GetByID)
+		r.Get("/unassigned/{role_id}", permissionController.GetUnassignedByRoleID)
 	})
 
 	r.Route("/role-permissions", func(r chi.Router) {

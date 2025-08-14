@@ -48,6 +48,38 @@ func (r *PermissionRepository) GetByID(id int64) (*model.Permission, error) {
 	return &p, nil
 }
 
+func (r *PermissionRepository) GetUnassignedByRoleID(roleID int) ([]model.Permission, error) {
+	rows, err := r.DB.Query(`
+		SELECT p.id, p.name, p.path, p.method
+		FROM permissions p
+		WHERE p.id NOT IN (
+			SELECT permission_id
+			FROM role_permissions
+			WHERE role_id = $1
+		)
+		ORDER BY p.id
+	`, roleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var permissions []model.Permission
+	for rows.Next() {
+		var p model.Permission
+		if err := rows.Scan(&p.ID, &p.Name, &p.Path, &p.Method); err != nil {
+			return nil, err
+		}
+		permissions = append(permissions, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return permissions, nil
+}
+
 func (r *PermissionRepository) Update(p *model.Permission) error {
 	_, err := r.DB.Exec(`UPDATE permissions SET name = $1, path = $2, method = $3 WHERE id = $4`,
 		p.Name, p.Path, p.Method, p.ID)

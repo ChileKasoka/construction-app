@@ -52,6 +52,17 @@ func (c *PermissionController) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(p)
 }
 
+func (c *PermissionController) GetUnassignedByRoleID(w http.ResponseWriter, r *http.Request) {
+	roleIDStr := chi.URLParam(r, "role_id")
+	roleID, _ := strconv.Atoi(roleIDStr)
+	permissions, err := c.Service.GetUnassignedByRoleID(roleID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(permissions)
+}
+
 func (c *PermissionController) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, _ := strconv.ParseInt(idStr, 10, 64)
